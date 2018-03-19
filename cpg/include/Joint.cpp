@@ -10,10 +10,12 @@
 
 namespace CPG {
 
-Joint::Joint(float _alpha, float _beta, float _update_interval, float initial_amplitude = 0, float initial_neutral_position = 0, float initial_phase_shift = 0)
+Joint::Joint(float _frequency, float _alpha, float _beta, float _update_interval, float initial_amplitude = 0, float initial_neutral_position = 0, float initial_phase_shift = 0)
 :   amplitude_t(0), neutral_position_t(0), phase_shift_t(0),
 	amplitude_t2(0), neutral_position_t2(0), phase_shift_t2(0),
-	update_interval(_update_interval), alpha(_alpha), beta(_beta),
+	update_interval(_update_interval), 
+    frequency(_frequency),
+    alpha(_alpha), beta(_beta),
 	output(0)
 {
 	// initialize all the values
@@ -27,10 +29,12 @@ Joint::Joint(float _alpha, float _beta, float _update_interval, float initial_am
 	total_joint++;
 }
 
-Joint::Joint(float _alpha, float _beta, float _update_interval)
+Joint::Joint(float _frequency, float _alpha, float _beta, float _update_interval)
 :   amplitude_t(0), neutral_position_t(0), phase_shift_t(0),
 	amplitude_t2(0), neutral_position_t2(0), phase_shift_t2(0),
-	update_interval(_update_interval), alpha(_alpha), beta(_beta),
+	update_interval(_update_interval), 
+    frequency(_frequency),
+    alpha(_alpha), beta(_beta),
 	output(0)
 {
 	// initialize all the values as zero
@@ -46,22 +50,22 @@ Joint::Joint(float _alpha, float _beta, float _update_interval)
 
 
 
-const void Joint::prepare_joint(){
+const void Joint::prepare_joint(float _frequency){
+    frequency = _frequency;
 	update_current_state();
 }
 
 const void Joint::joint_CPG(float input_amplitude, float input_neutral_position){
 
 	// Implement CPG formulas on the amplitude and neutral_position
-	amplitude_t2  = (-1) * pow(alpha, 2) * (amplitude[0] - input_amplitude) - 2 * alpha * amplitude_t;
-	neutral_position_t2  = (-1) * pow(alpha, 2) * (neutral_position[0] - input_neutral_position) - 2 * alpha * neutral_position_t;
+	amplitude_t2  = (-1) * pow(alpha * frequency, 2) * (amplitude[0] - input_amplitude) - 2 * alpha * frequency * amplitude_t;
+	neutral_position_t2  = (-1) * pow(beta * frequency, 2) * (neutral_position[0] - input_neutral_position) - 2 * beta * frequency * neutral_position_t;
 
 }
 
 const void Joint::update_joint_state(float _phase_shift_t2){
 	phase_shift_t2 = _phase_shift_t2;
 	integration();
-    std::cout << phase_shift[1] << '\t' << phase_shift_t << '\t' << phase_shift_t2 << std::endl;
 	output = neutral_position[1] + amplitude[1] * sin(phase_shift[1]);
 }
 

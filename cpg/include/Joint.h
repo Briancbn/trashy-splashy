@@ -15,10 +15,10 @@ namespace CPG {
 class Joint {
 
 public:
-	Joint(float _alpha, float _beta, float _update_interval, float initial_amplitude, float initial_neutral_position, float initial_phase_shift);
-	Joint(float _alpha, float _beta, float _update_interval);
+	Joint(float _frequency, float _alpha, float _beta, float _update_interval, float initial_amplitude, float initial_neutral_position, float initial_phase_shift);
+	Joint(float _frequency, float _alpha, float _beta, float _update_interval);
 
-	const void prepare_joint();
+	const void prepare_joint(float _frequency);
 	// Do CPG on amplitude and neutral position inside joint
 	const void joint_CPG(float input_amplitude, float input_neutral_position);
 
@@ -48,6 +48,9 @@ private:
 
 	// The update_interval with respect to second
 	float update_interval;
+
+    // Frequency
+    float frequency;
 
 	// Parameters for the joint
 	float alpha, beta;

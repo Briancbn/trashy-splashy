@@ -11,9 +11,9 @@
 
 #define FREQUENCY 1.75
 #define NUM_SERVO 3
-float alpha = 11.68 * FREQUENCY;
-float beta = 11.68 * FREQUENCY;
-float mu = 5.84 * FREQUENCY;
+float alpha = 11.68;
+float beta = 11.68;
+float mu = 5.84;
 float update_interval = 0.02;
 
 
@@ -27,6 +27,7 @@ int main(int argc, char **argv){
     std::vector<float> input_amplitude(NUM_SERVO, 0);
     std::vector<float> input_neutral_position(NUM_SERVO, 0);
     std::vector<float> input_phase_shift(NUM_SERVO, 0);
+    float frequency = FREQUENCY;
     for(int i = 0; i < NUM_SERVO; i++){
         input_phase_shift[i] = i * M_PI / 3; 
     }
@@ -39,6 +40,7 @@ int main(int argc, char **argv){
             float new_amplitude = (rand() % 100) / 100.0;
             float new_neutral = (rand() % 100) / 100.0;
             float new_neutral_diff = (rand() % 100) / 100.0;
+            frequency = 2 * (rand() % 100) / 100 + 1;
             for(int i = 0; i < NUM_SERVO; i++){
                 input_amplitude[i] = new_amplitude;
                 input_neutral_position[i] = new_neutral + (i - 1) * new_neutral_diff;
@@ -46,7 +48,7 @@ int main(int argc, char **argv){
         }
 
         std::vector<float> output(NUM_SERVO);
-        output =  cpg_gen.generate_new_pose(input_amplitude, input_neutral_position, input_phase_shift);
+        output =  cpg_gen.generate_new_pose(frequency, input_amplitude, input_neutral_position, input_phase_shift);
         cpg::Fin_servos cpg;
         cpg.L1.amp_in = input_amplitude[0];
         cpg.L1.neu_in = input_neutral_position[0];
