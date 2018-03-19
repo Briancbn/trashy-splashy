@@ -17,7 +17,7 @@ CPG::CPG(int8_t _joint_num, float _frequency, float _alpha, float _beta, float _
 {
 	// Initialize the Joint vector with initial condition
 	for(int i = 0; i < joint_num; i++){
-		joint.push_back(Joint(_alpha, _beta, _update_interval, initial_amplitude[i], initial_neutral_position[i], initial_phase_shift[i]));
+		joint.push_back(Joint(frequency, _alpha, _beta, _update_interval, initial_amplitude[i], initial_neutral_position[i], initial_phase_shift[i]));
 	}
 }
 
@@ -29,19 +29,20 @@ CPG::CPG(int8_t _joint_num, float _frequency, float _alpha, float _beta, float _
 {
 	// Initialize the Joint vector without initial condition
 	for(int i = 0; i < joint_num; i++){
-		joint.push_back(Joint(_alpha, _beta, _update_interval));
+		joint.push_back(Joint(frequency, _alpha, _beta, _update_interval));
 	}
 
 
 }
 
-const std::vector<float> CPG::generate_new_pose(const std::vector<float>& input_amplitude, const std::vector<float>& input_neutral_position, const std::vector<float>& input_phase_shift)
+const std::vector<float> CPG::generate_new_pose(float _frequency, const std::vector<float>& input_amplitude, const std::vector<float>& input_neutral_position, const std::vector<float>& input_phase_shift)
 {
+    frequency = _frequency;
 	std::vector<float> output(joint_num), phase_shift(joint_num), phase_shift_t(joint_num), phase_shift_t2(joint_num);
 
 	// Prepare the joint data to be updated first
 	for(int i = 0; i < joint_num; i++){
-		joint[i].prepare_joint();
+		joint[i].prepare_joint(frequency);
 
 		// Get the current phase shift and the change of phase shift
 		phase_shift[i] = joint[i].get_phase_shift();
@@ -62,7 +63,7 @@ const std::vector<float> CPG::generate_new_pose(const std::vector<float>& input_
 		}
 
 		// calculate second order change of the phase shift
-		phase_shift_t2[i] = (-1) * pow(mu, 2) * err_sum - 2 * (joint_num - 1) * mu * ((phase_shift_t[i]) - 2 * M_PI * frequency);
+		phase_shift_t2[i] = (-1) * pow(mu * frequency, 2) * err_sum - 2 * (joint_num - 1) * mu * frequency * ((phase_shift_t[i]) - 2 * M_PI * frequency);
 
 		joint[i].update_joint_state(phase_shift_t2[i]);
 		output[i] = joint[i].get_output();

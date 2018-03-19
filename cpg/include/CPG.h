@@ -24,7 +24,7 @@ public:
 	CPG(int8_t _joint_num, float _frequency, float _alpha, float _beta, float _mu, float _update_interval);
 
 	// Generate the output position using CPG
-	const std::vector<float>generate_new_pose(const std::vector<float>& input_amplitude, const std::vector<float>& input_neutral_position, const std::vector<float>& input_phase_shift);
+	const std::vector<float>generate_new_pose(float _frequency, const std::vector<float>& input_amplitude, const std::vector<float>& input_neutral_position, const std::vector<float>& input_phase_shift);
 
 	virtual ~CPG();
 
