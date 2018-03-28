@@ -20,7 +20,7 @@
 class Fin {
 public:
 	Fin(int8_t _num_fin_servos);
-	void init(PWMServo* _servos);
+	void init(PWMServo* _servos, int* _offset_angle_deg);
 	void write(uint16_t propel, bool propel_direction, uint16_t incline, bool incline_direction);
 	void write_angle_rad(const std::vector<float>& angle_rad);
 	void write_angle_deg(const std::vector<int>& angle_deg);
@@ -31,6 +31,7 @@ public:
 private:
 	int8_t num_fin_servos;
 	PWMServo* servos;
+	int* offset_angle_deg;
 	CPG::CPG cpg;
 
 	const int rad_to_deg(float rad){

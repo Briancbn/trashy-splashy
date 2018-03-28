@@ -8,8 +8,11 @@
 #ifndef CONFIG_H_
 #define CONFIG_H_
 
+#define RAZOR_IMU_BAUD 115200
+#define RAZOR_IMU_SERIAL Serial1
+#define IMU_UPDATE_RATE 0.03
 
-#define ANGLE_RANGE 250
+#define SERVO_ANGLE_RANGE 250
 
 #define DEFAULT_FREQUENCY 1
 #define PHASE_SHIFT 60
