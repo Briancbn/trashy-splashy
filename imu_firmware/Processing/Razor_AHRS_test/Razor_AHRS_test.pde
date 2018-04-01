@@ -30,13 +30,12 @@ final static int SERIAL_PORT_NUM = 0;
 // 4. Try again.
 
 
-final static int SERIAL_PORT_BAUD_RATE = 115200;
+final static int SERIAL_PORT_BAUD_RATE = 57600;
 
 float yaw = 0.0f;
 float pitch = 0.0f;
 float roll = 0.0f;
 float yawOffset = 0.0f;
-String floatRX = null;
 
 PFont font;
 Serial serial;
@@ -148,17 +147,16 @@ void setupRazor() {
   
   // Set Razor output parameters
   serial.write("#ob");  // Turn on binary output
-  serial.clear();  // Clear input buffer up to here
-  serial.write("#s00");  // Request synch token
   serial.write("#o1");  // Turn on continuous streaming output
   serial.write("#oe0"); // Disable error message output
   
   // Synch with Razor
- // serial.clear();  // Clear input buffer up to here
-  //serial.write("#s00");  // Request synch token
+  serial.clear();  // Clear input buffer up to here
+  serial.write("#s00");  // Request synch token
 }
 
 float readFloat(Serial s) {
+  // Convert from little endian (Razor) to big endian (Java) and interpret as float
   return Float.intBitsToFloat(s.read() + (s.read() << 8) + (s.read() << 16) + (s.read() << 24));
 }
 
@@ -176,14 +174,13 @@ void draw() {
     if (frameCount == 2)
       setupRazor();  // Set ouput params and request synch token
     else if (frameCount > 2)
-      synched = readToken(serial, "#SYNCH00\r\n");  // Look for synch token //<>//
+      synched = readToken(serial, "#SYNCH00\r\n");  // Look for synch token
     return;
   }
-
   
   // Read angles from serial port
   while (serial.available() >= 12) {
-    yaw = readFloat(serial); //<>//
+    yaw = readFloat(serial);
     pitch = readFloat(serial);
     roll = readFloat(serial);
   }
@@ -210,15 +207,7 @@ void draw() {
   text("Roll: " + ((int) roll), 300, 0);
   popMatrix();
 }
-/*
-  void serialEvent(Serial s){
-    yaw = Float.intBitsToFloat(s.read() + (s.read() << 8) + (s.read() << 16) + (s.read() << 24));
-    pitch = Float.intBitsToFloat(s.read() + (s.read() << 8) + (s.read() << 16) + (s.read() << 24));
-    roll = Float.intBitsToFloat(s.read() + (s.read() << 8) + (s.read() << 16) + (s.read() << 24)); //<>//
-   // s.clear();
-//    redraw = true;
-  }
-  */
+
 void keyPressed() {
   switch (key) {
     case '0':  // Turn Razor's continuous output stream off
@@ -234,3 +223,6 @@ void keyPressed() {
       yawOffset = yaw;
   }
 }
+
+
+

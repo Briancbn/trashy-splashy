@@ -14,27 +14,26 @@ Razor_imu::Razor_imu() {
 
 void Razor_imu::init(){
 	RAZOR_IMU_SERIAL.begin(RAZOR_IMU_BAUD);
-	RAZOR_IMU_SERIAL.println("#o1");
+
 }
 
 bool Razor_imu::update(){
 	char incomingByte;
 	String incomingString;
 	int counter = 0;
-
+	RAZOR_IMU_SERIAL.println("#f");
     // send data only when you receive data:
     if (RAZOR_IMU_SERIAL.available() > 0 && RAZOR_IMU_SERIAL.read() == '#') {
         while (RAZOR_IMU_SERIAL.available() > 0) {
             incomingByte = RAZOR_IMU_SERIAL.read();
             incomingString += incomingByte;
        }
-			Serial.println(incomingString);
  
         String word = "";
         for(uint i = 1; i < incomingString.length() - 1; i++){
             if(incomingString[i] == ','){
 				if(counter == 0){
-                	row = word.toFloat();
+                	yaw = word.toFloat();
 				}
 				else if(counter == 1){
 					pitch = word.toFloat();
@@ -46,7 +45,7 @@ bool Razor_imu::update(){
                 word += incomingString[i];
             }
         }
-        yaw = word.toFloat();
+        roll = word.toFloat();
         incomingString = "";
 		return true;
     }

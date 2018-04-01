@@ -18,7 +18,6 @@ void Fin::init(PWMServo* _servos, int* _offset_angle_deg){
   servos = _servos;
   offset_angle_deg = _offset_angle_deg;
   write(0, true, 0, true);
-  ::delay(600);
 
 }
 
@@ -69,7 +68,7 @@ void Fin::write_angle_rad(const std::vector<float>& angle_rad){
 
 void Fin::write_angle_deg(const std::vector<int>& angle_deg){
   for(int i = 0; i < num_fin_servos; i++){
-    servos[i].write(90 + offset_angle_deg[i] + angle_deg[i] * 180 / SERVO_ANGLE_RANGE);
+    servos[i].write(90 + (offset_angle_deg[i] + angle_deg[i]) * 180 / SERVO_ANGLE_RANGE);
   }
 }
 
@@ -79,7 +78,7 @@ void Fin::write_angle_rad(float angle_rad){
 
 void Fin::write_angle_deg(int angle_deg){
   for(int i = 0; i < num_fin_servos; i++){
-    servos[i].write(90 + offset_angle_deg[i] + angle_deg * 180 / SERVO_ANGLE_RANGE);
+    servos[i].write(90 + (offset_angle_deg[i] + angle_deg) * 180 / SERVO_ANGLE_RANGE);
   }
 }
 

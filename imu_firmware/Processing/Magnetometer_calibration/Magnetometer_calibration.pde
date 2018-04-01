@@ -49,7 +49,7 @@ import processing.opengl.*;
 import processing.serial.*;
 import java.io.*;
 
-final static int SERIAL_PORT_BAUD_RATE = 115200;
+final static int SERIAL_PORT_BAUD_RATE = 57600;
 
 final static int NUM_MAGN_SAMPLES = 10000;
 float magnetom[][] = new float[NUM_MAGN_SAMPLES][3];
@@ -78,10 +78,10 @@ boolean readToken(Serial serial, String token) {
 // Global setup
 void setup() {
   // Setup graphics
-  size(1200, 1200, OPENGL);
+  size(800, 800, OPENGL);
   smooth();
   noStroke();
-  frameRate(60);
+  frameRate(50);
   colorMode(HSB);
   
   // Load font
@@ -112,7 +112,7 @@ void setupRazor() {
   serial.write("#osrb");  // Turn on binary output of raw sensor data
   serial.write("#o1");    // Turn on continuous streaming output
   serial.write("#oe0");   // Disable error message output
-
+  
   // Synch with Razor
   serial.clear();  // Clear input buffer up to here
   serial.write("#s00");  // Request synch token
@@ -171,22 +171,22 @@ void draw() {
     // Read and draw new sample
     if (magnetomIndex < NUM_MAGN_SAMPLES && serial.available() >= 36) {
       // Read all available magnetometer data from serial port
-      while (serial.available() >= 36) { //<>//
+      while (serial.available() >= 36) {
         // Skip accel data
         skipBytes(serial, 12);
         // Read magn data
-        magnetom[magnetomIndex][0] = readFloat(serial);  // x //<>//
-        magnetom[magnetomIndex][1] = readFloat(serial); //<>//
-        magnetom[magnetomIndex][2] = readFloat(serial);  // z //<>//
+        magnetom[magnetomIndex][0] = readFloat(serial);  // x
+        magnetom[magnetomIndex][1] = readFloat(serial);  // y
+        magnetom[magnetomIndex][2] = readFloat(serial);  // z
         // Skip gyro data
         skipBytes(serial, 12);
       }
       
       // Draw new point
-      fill((magnetom[magnetomIndex][2] + 800)/8, 255, 255);
+      fill((magnetom[magnetomIndex][2] + 800) / 8, 255, 255);
       noStroke();
       translate(magnetom[magnetomIndex][0], magnetom[magnetomIndex][1], magnetom[magnetomIndex][2]);
-      sphere(3);
+      sphere(5);
       
       magnetomIndex++;
     }
@@ -366,9 +366,9 @@ void outputCalibration() {
   // Output calibration
   System.out.printf("In the Razor_AHRS.ino, under 'SENSOR CALIBRATION' find the section that reads 'Magnetometer (extended calibration)'\n");
   System.out.printf("Replace the existing 3 lines with these:\n\n");
-  System.out.printf("#define CALIBRATION__MAGN_USE_EXTENDED true\n");
-  System.out.printf("const float magn_ellipsoid_center[3] = {%.6g, %.6g, %.6g};\n", center.get(0), center.get(1), center.get(2));
-  System.out.printf("const float magn_ellipsoid_transform[3][3] = {{%.6g, %.6g, %.6g}, {%.6g, %.6g, %.6g}, {%.6g, %.6g, %.6g}};\n",
+  System.out.printf("boolean CALIBRATION__MAGN_USE_EXTENDED = true;\n");
+  System.out.printf("float magn_ellipsoid_center[3] = {%.6g, %.6g, %.6g};\n", center.get(0), center.get(1), center.get(2));
+  System.out.printf("float magn_ellipsoid_transform[3][3] = {{%.6g, %.6g, %.6g}, {%.6g, %.6g, %.6g}, {%.6g, %.6g, %.6g}};\n",
     comp.get(0), comp.get(1), comp.get(2), comp.get(3), comp.get(4), comp.get(5), comp.get(6), comp.get(7), comp.get(8));
   println("\n");
 }
