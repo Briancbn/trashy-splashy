@@ -8,6 +8,9 @@
 #ifndef CONFIG_H_
 #define CONFIG_H_
 
+#define ROBOT_RADIUS 0.3
+
+
 /******** Basic Tuning Parameters ********/
 
 // max linear power
@@ -17,7 +20,7 @@
 #define MAX_ANGULAR_POWER 255
 
 // PID values
-#define KP 10
+#define KP 1
 #define KI 0
 #define KD 0
 
@@ -59,7 +62,7 @@
 #define ALPHA 11.68
 #define BETA 11.68
 #define MU 5.84
-#define UPDATE_INTERVAL 0.02
+#define UPDATE_INTERVAL 0.01
 
 #define LEFT_PROPEL_DIRECTION false
 #define RIGHT_PROPEL_DIRECTION true
