@@ -19,13 +19,23 @@
 
 class Fin {
 public:
-	Fin(int8_t _num_fin_servos);
-	void init(PWMServo* _servos, int* _offset_angle_deg);
-	void write(uint16_t propel, bool propel_direction, uint16_t incline, bool incline_direction);
+	Fin(int8_t _num_fin_servos); // _num_fin_servos must be even
+	void init(PWMServo* _servos, int* _offset_angle_deg); // PWM servos needs to define outside of the object
+	void write(int linear_speed, int angular_speed, int incline);
+	void write_L(uint16_t propel, bool propel_direction, uint16_t incline, bool incline_direction);
+	void write_R(uint16_t propel, bool propel_direction, uint16_t incline, bool incline_direction);
 	void write_angle_rad(const std::vector<float>& angle_rad);
 	void write_angle_deg(const std::vector<int>& angle_deg);
 	void write_angle_rad(float angle_rad);
 	void write_angle_deg(int angle_deg);
+	void write_L_angle_rad(const std::vector<float>& angle_rad);
+	void write_L_angle_deg(const std::vector<int>& angle_deg);
+	void write_L_angle_rad(float angle_rad);
+	void write_L_angle_deg(int angle_deg);
+	void write_R_angle_rad(const std::vector<float>& angle_rad);
+	void write_R_angle_deg(const std::vector<int>& angle_deg);
+	void write_R_angle_rad(float angle_rad);
+	void write_R_angle_deg(int angle_deg);
 	virtual ~Fin();
 
 private:
