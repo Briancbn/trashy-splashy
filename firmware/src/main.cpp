@@ -5,6 +5,7 @@
 #include "Config.h"
 #include "PWMServo.h"
 #include "Razorimu.h"
+#include "Command.h"
 
 int pins[] = {L1_PIN, L2_PIN, L3_PIN, R1_PIN, R2_PIN, R3_PIN};
 int offset[] = {L1_OFFSET, L2_OFFSET, L3_OFFSET, R1_OFFSET, R2_OFFSET, R3_OFFSET};
@@ -22,7 +23,72 @@ elapsedMillis imu_timer;
 
 PID pid(KP, KI, KD);
 
-int desired_linear_speed, desired_angular_speed;
+bool start_flag = false;
+int input_linear_speed = 0, input_angular_speed = 0;
+
+long baud = 115200;
+char cmd;
+char argv1[256];
+char argv2[256];
+float arg1;
+float arg2;
+int arg = 0;
+int index0 = 0;
+
+void reset_command(){
+    cmd = ' ';
+    memset(argv1, 0, sizeof(argv1));
+    memset(argv2, 0, sizeof(argv2));
+    arg1 = 0;
+    arg2 = 0;
+    arg = 0;
+    index0 = 0;
+}
+
+void run_command()
+{
+    arg1 = atof(argv1);
+    arg2 = atof(argv2);
+    switch (cmd)
+    {
+    case GET_BAUDRATE:
+        Serial.println(baud);
+        break;
+    case GET_DEVICE:
+        Serial.println("Teensy3.2");
+        break;
+    case START:
+        Serial.println("OK");
+        start_flag = true;
+        desired_angle = razor_imu.yaw;
+        robot.write_angle_deg(0);
+        break;
+    case STOP:
+        Serial.println("OK");
+        start_flag = false;
+        break;
+    case LINEAR_INPUT:
+        input_linear_speed = arg1;
+        Serial.println("OK");
+        break;
+    case ANGULAR_INPUT:
+        input_angular_speed = arg1;
+        Serial.println("OK");
+        break;
+    case GET_YAW:
+        Serial.println(razor_imu.yaw);
+        break;
+    }
+}
+
+uint32_t lastBlink = 0;
+void blinkLED()
+{
+  static bool ledState = false;
+  digitalWrite(13, ledState);
+  ledState = !ledState;
+}
+
 
 void setup() {
     for(int i = 0; i < 6; i++){
@@ -39,7 +105,7 @@ void setup() {
     
     delay(1000);    
     
-    Serial.begin(115200);
+    Serial.begin(baud);
 
     razor_imu.init();
     while(!razor_imu.update() || millis() < 5000){
@@ -66,6 +132,41 @@ float scale_angle(float angle){
 }
 
 void loop() {
+
+
+    while(Serial.available() > 0){
+        char chr = Serial.read();
+        if (chr == 13){
+            if (arg == 1) argv1[index0] = ' ';
+            else if (arg == 2) argv2[index0] = ' ';
+            run_command();
+            reset_command();
+        }
+        else if (chr == ' '){
+            if (arg == 0) arg = 1;
+            else if (arg == 1){
+                argv1[index0] = ' ';
+                arg = 2;
+                index0 = 0;
+            }
+        }
+        else{
+            if (arg == 0){
+                cmd = chr;
+            }
+            else if (arg == 1){
+                argv1[index0] = chr;
+                index0++;
+            }
+            else if (arg == 2){
+                argv2[index0] = chr;
+                index0++;
+            }
+        }
+    }
+    
+
+
     if(imu_timer > 1000 * IMU_UPDATE_RATE){
         imu_timer = 0;
         razor_imu.update();
@@ -73,13 +174,19 @@ void loop() {
 
     if(cpg_timer > 1000 * UPDATE_INTERVAL){
         cpg_timer = 0;
-        desired_angular_speed = 0;
-        desired_linear_speed = 255;
-        desired_angle += RAD_TO_DEG * desired_angular_speed * UPDATE_INTERVAL;
-        float err = scale_angle(razor_imu.yaw - desired_angle);
-        pid.load_err(err);
-//        robot_write(0,0);
-//        L_fin.write(150, LEFT_PROPEL_DIRECTION, 0, true);
-        robot.write(desired_linear_speed, pid.get_angular(), 0);
+
+        if (start_flag)
+        {
+            if (millis() > lastBlink + 200)
+            {
+                blinkLED();
+                lastBlink = millis();
+            }
+
+            desired_angle += RAD_TO_DEG * input_angular_speed * UPDATE_INTERVAL;
+            float err = scale_angle(razor_imu.yaw - desired_angle);
+            pid.load_err(err);
+            robot.write(input_linear_speed, pid.get_angular(), 0);
+        }
     }
 }
