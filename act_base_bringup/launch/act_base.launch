@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<launch>
+    <include file="$(find act_base_bringup)/launch/act_robot_base.launch" />
+    <include file="$(find microstrain_3dm_gx5_45)/launch/microstrain_25.launch" />
+    <include file="$(find urg_node)/launch/urg_lidar.launch" />
+    <include file="$(find velodyne_pointcloud)/launch/VLP16_points.launch" />
+    <node pkg="pointcloud_to_laserscan" type="pointcloud_to_laserscan_node" name="pointcloud_to_laserscan" >
+        <remap from="cloud_in" to="velodyne_points"/>
+        <remap from="scan" to="pcl_scan"/>
+        <rosparam>
+            min_height: 1.2
+            max_height: 10.0
+            angle_min: -3.14
+            angle_max: 3.14
+            scan_time: 0.05
+            range_min: 0.2
+            range_max: 80.0
+            use_inf: true
+        </rosparam>
+    </node>
+
+    <!--node pkg="laser_filters" type="scan_to_scan_filter_chain" name="laser_filter">
+        <rosparam command="load" file="$(find act_bringup)/laser_filter_config.yaml" />
+        <remap from="scan" to="pcl_scan" />
+    </node-->
+    <node pkg="pointcloud_to_laserscan" type="pointcloud_to_laserscan_node" name="pointcloud_to_laserscan2" >
+        <remap from="cloud_in" to="velodyne_points"/>
+        <remap from="scan" to="front_scan"/>
+        <rosparam>
+            min_height: -0.5
+            max_height: 3.0
+            angle_min: -3.14
+            angle_max: 3.14
+            scan_time: 0.05
+            range_min: 0.2
+            range_max: 15.0
+            use_inf: true
+        </rosparam>
+    </node>
+
+
+    <include file="$(find act_base_odometry)/launch/act_imu_test.launch" />
+
+
+</launch>

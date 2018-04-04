@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<launch>
+  <arg name="act_drive_port" value="/dev/actdrive" />
+  <arg name="act_feedback_port" value="/dev/actfeedback" />
+  <arg name="act_drive_baud" value="115200" />
+  <arg name="act_feedback_baud" value="115200" />
+
+
+  <node pkg="act_drive" name="act_base_node" type="act_base_node.py" output="screen">
+    <param name="port" value="$(arg act_drive_port)" />
+    <param name="baud" value="$(arg act_drive_baud)" />
+  </node>
+
+  <node pkg="act_feedback" name="act_feedback_node" type="act_feedback_node.py" output="screen">
+    <param name="port" value="$(arg act_feedback_port)" />
+    <param name="baud" value="$(arg act_feedback_baud)" />
+  </node>
+
+  <include file="$(find act_base_odometry)/launch/act_base_odometry.launch" />
+</launch>
