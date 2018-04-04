@@ -32,12 +32,35 @@ bool Razor_imu::update(){
         String word = "";
         for(uint i = 1; i < incomingString.length() - 1; i++){
             if(incomingString[i] == ','){
-				if(counter == 0){
+				switch(counter)
+                {
+                case 0:                
                 	yaw = word.toFloat();
-				}
-				else if(counter == 1){
+                    break;
+				case 1:
 					pitch = word.toFloat();
+                    break;
+                case 2:
+					roll = word.toFloat();
+                    break;
+				case 3:
+					ax = word.toFloat();
+                    break;
+				case 4:
+					ay = word.toFloat();
+                    break;
+				case 5:
+					az = word.toFloat();
+                    break;
+				case 6:
+					gx = word.toFloat();
+                    break;
+				case 7:
+					gy = word.toFloat();
+                    break;
+                  
 				}
+                
 				counter += 1;
                 word = "";
             }
@@ -45,7 +68,7 @@ bool Razor_imu::update(){
                 word += incomingString[i];
             }
         }
-        roll = word.toFloat();
+        gz = word.toFloat();
         incomingString = "";
 		return true;
     }
