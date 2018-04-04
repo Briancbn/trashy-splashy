@@ -66,6 +66,9 @@ void run_command()
     case STOP:
         Serial.println("OK");
         start_flag = false;
+        robot.write_angle_deg(90);
+        input_linear_speed = 0;
+        input_angular_speed = 0;
         break;
     case LINEAR_INPUT:
         input_linear_speed = arg1;
@@ -78,6 +81,31 @@ void run_command()
     case GET_YAW:
         Serial.println(razor_imu.yaw);
         break;
+    case GET_PITCH:
+        Serial.println(razor_imu.pitch);
+        break;
+    case GET_ROLL:
+        Serial.println(razor_imu.roll);
+        break;
+    case GET_AX:
+        Serial.println(razor_imu.ax);
+        break;
+    case GET_AY:
+        Serial.println(razor_imu.ay);
+        break;
+    case GET_AZ:
+        Serial.println(razor_imu.az);
+        break;
+    case GET_GX:
+        Serial.println(razor_imu.gx);
+        break;
+    case GET_GY:
+        Serial.println(razor_imu.gy);
+        break;
+    case GET_GZ:
+        Serial.println(razor_imu.gz);
+        break;
+
     }
 }
 
@@ -89,6 +117,26 @@ void blinkLED()
   ledState = !ledState;
 }
 
+void print_imu(){
+        Serial.print(razor_imu.yaw);
+        Serial.print('\t');
+        Serial.print(razor_imu.pitch);
+        Serial.print('\t');
+        Serial.print(razor_imu.roll);
+        Serial.print('\t');
+        Serial.print(razor_imu.ax);
+        Serial.print('\t');
+        Serial.print(razor_imu.ay);
+        Serial.print('\t');
+        Serial.print(razor_imu.az);
+        Serial.print('\t');
+        Serial.print(razor_imu.gx);
+        Serial.print('\t');
+        Serial.print(razor_imu.gy);
+        Serial.print('\t');
+        Serial.print(razor_imu.gz);
+        Serial.print('\n');    
+}
 
 void setup() {
     for(int i = 0; i < 6; i++){
@@ -101,7 +149,7 @@ void setup() {
     robot.init(servos, offset);
     delay(1000);   
 
-    robot.write_angle_deg(0);
+//    robot.write_angle_deg(0);
     
     delay(1000);    
     
@@ -170,6 +218,7 @@ void loop() {
     if(imu_timer > 1000 * IMU_UPDATE_RATE){
         imu_timer = 0;
         razor_imu.update();
+        //print_imu();
     }
 
     if(cpg_timer > 1000 * UPDATE_INTERVAL){

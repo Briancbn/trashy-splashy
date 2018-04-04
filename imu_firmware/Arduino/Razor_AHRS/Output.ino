@@ -89,7 +89,7 @@ void output_sensors_text(char raw_or_calibrated)
 
 void output_both_angles_and_sensors_text()
 {
-  LOG_PORT.print("#YPRAG=");
+  LOG_PORT.print("#,");
   LOG_PORT.print(TO_DEG(yaw)); LOG_PORT.print(",");
   LOG_PORT.print(TO_DEG(pitch)); LOG_PORT.print(",");
   LOG_PORT.print(TO_DEG(roll)); LOG_PORT.print(",");
