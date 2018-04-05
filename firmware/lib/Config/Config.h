@@ -62,7 +62,7 @@
 #define ALPHA 11.68
 #define BETA 11.68
 #define MU 5.84
-#define UPDATE_INTERVAL 0.01
+#define UPDATE_INTERVAL 0.006
 
 #define LEFT_PROPEL_DIRECTION false
 #define RIGHT_PROPEL_DIRECTION true

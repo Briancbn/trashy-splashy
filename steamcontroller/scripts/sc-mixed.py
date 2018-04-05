@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 # The MIT License (MIT)
 #
@@ -37,9 +37,7 @@ from steamcontroller.daemon import Daemon
 
 import gc
 
-def evminit():
-    evm = EventMapper()
-
+def set_evm_pad(evm):
     evm.setStickAxes(Axes.ABS_X, Axes.ABS_Y)
     evm.setPadAxes(Pos.RIGHT, Axes.ABS_RX, Axes.ABS_RY)
     evm.setPadAxesAsButtons(Pos.LEFT, [Axes.ABS_HAT0X,
@@ -56,12 +54,54 @@ def evminit():
     evm.setButtonAction(SCButtons.RB, Keys.BTN_TR)
     evm.setButtonAction(SCButtons.BACK, Keys.BTN_SELECT)
     evm.setButtonAction(SCButtons.START, Keys.BTN_START)
-    evm.setButtonAction(SCButtons.STEAM, Keys.BTN_MODE)
+
     evm.setButtonAction(SCButtons.LPAD, Keys.BTN_THUMBL)
     evm.setButtonAction(SCButtons.RPAD, Keys.BTN_THUMBR)
     evm.setButtonAction(SCButtons.LGRIP, Keys.BTN_A)
     evm.setButtonAction(SCButtons.RGRIP, Keys.BTN_B)
 
+def set_evm_desktop(evm):
+    evm.setPadMouse(Pos.RIGHT)
+    evm.setPadScroll(Pos.LEFT)
+    evm.setStickButtons([Keys.KEY_UP,
+                         Keys.KEY_LEFT,
+                         Keys.KEY_DOWN,
+                         Keys.KEY_RIGHT])
+
+    evm.setTrigButton(Pos.LEFT, Keys.BTN_RIGHT)
+    evm.setTrigButton(Pos.RIGHT, Keys.BTN_LEFT)
+
+    evm.setButtonAction(SCButtons.LB, Keys.KEY_VOLUMEDOWN)
+    evm.setButtonAction(SCButtons.RB, Keys.KEY_VOLUMEUP)
+
+    evm.setButtonAction(SCButtons.A, Keys.KEY_ENTER)
+    evm.setButtonAction(SCButtons.B, Keys.KEY_BACKSPACE)
+    evm.setButtonAction(SCButtons.X, Keys.KEY_ESC)
+    evm.setButtonAction(SCButtons.Y, Keys.KEY_PLAYPAUSE)
+
+    evm.setButtonAction(SCButtons.START, Keys.KEY_NEXTSONG)
+    evm.setButtonAction(SCButtons.BACK, Keys.KEY_PREVIOUSSONG)
+
+    evm.setButtonAction(SCButtons.LGRIP, Keys.KEY_BACK)
+    evm.setButtonAction(SCButtons.RGRIP, Keys.KEY_FORWARD)
+
+    evm.setButtonAction(SCButtons.LPAD, Keys.BTN_MIDDLE)
+    evm.setButtonAction(SCButtons.RPAD, Keys.KEY_SPACE)
+
+pad = True
+def toggle_callback(evm, btn, pressed):
+    global pad
+    if not pressed:
+        if pad:
+            set_evm_desktop(evm)
+        else:
+            set_evm_pad(evm)
+        pad = not pad
+
+def evminit():
+    evm = EventMapper()
+    set_evm_pad(evm)
+    evm.setButtonCallback(SCButtons.STEAM, toggle_callback)
     return evm
 
 class SCDaemon(Daemon):
@@ -97,8 +137,7 @@ if __name__ == '__main__':
                 evm = evminit()
                 sc = SteamController(callback=evm.process)
                 sc.run()
-
             except KeyboardInterrupt:
-                pass
+                return
 
     _main()

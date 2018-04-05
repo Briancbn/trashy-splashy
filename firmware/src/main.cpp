@@ -24,7 +24,8 @@ elapsedMillis imu_timer;
 PID pid(KP, KI, KD);
 
 bool start_flag = false;
-int input_linear_speed = 0, input_angular_speed = 0;
+int input_linear_speed = 0; 
+float input_angular_speed = 0;
 
 long baud = 115200;
 char cmd;
@@ -47,8 +48,10 @@ void reset_command(){
 
 void run_command()
 {
-    arg1 = atof(argv1);
-    arg2 = atof(argv2);
+    String args1 = String(argv1);
+    String args2 = String(argv2);
+    arg1 = args1.toFloat();
+    arg2 = args2.toFloat();
     switch (cmd)
     {
     case GET_BAUDRATE:
@@ -69,6 +72,7 @@ void run_command()
         robot.write_angle_deg(90);
         input_linear_speed = 0;
         input_angular_speed = 0;
+        digitalWrite(13, HIGH);
         break;
     case LINEAR_INPUT:
         input_linear_speed = arg1;

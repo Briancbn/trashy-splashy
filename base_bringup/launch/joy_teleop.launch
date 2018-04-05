@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<launch>
+    <arg name="teleop_speed" default="200" />
+    <arg name="teleop_turn" default="1" />
+
+    <include file="$(find joy)/launch/joy.launch.xml" />
+
+    <node pkg="base_drive" name="joy_drive" type="joy_drive" >
+        <param name="drive_scale" value="$(arg teleop_speed)" />
+        <param name="turn_scale" value="$(arg teleop_turn)" />
+    </node>
+
+</launch>

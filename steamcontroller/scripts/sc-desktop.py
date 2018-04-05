@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 # The MIT License (MIT)
 #
@@ -22,45 +22,46 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-"""Steam Controller XBOX360 Gamepad Emulator"""
+"""Steam Controller Mouse, Keyboard mode"""
 
-from steamcontroller import \
-    SteamController, \
-    SCButtons
-from steamcontroller.events import \
-    EventMapper, \
-    Pos
-from steamcontroller.uinput import \
-    Keys, \
-    Axes
+from steamcontroller import SteamController, SCButtons
+from steamcontroller.events import EventMapper, Pos
+from steamcontroller.uinput import Keys
+
 from steamcontroller.daemon import Daemon
 
 import gc
 
 def evminit():
     evm = EventMapper()
+    evm.setPadMouse(Pos.RIGHT)
+    evm.setPadScroll(Pos.LEFT)
+    evm.setStickButtons([Keys.KEY_UP,
+                         Keys.KEY_LEFT,
+                         Keys.KEY_DOWN,
+                         Keys.KEY_RIGHT])
 
-    evm.setStickAxes(Axes.ABS_X, Axes.ABS_Y)
-    evm.setPadAxes(Pos.RIGHT, Axes.ABS_RX, Axes.ABS_RY)
-    evm.setPadAxesAsButtons(Pos.LEFT, [Axes.ABS_HAT0X,
-                                       Axes.ABS_HAT0Y])
+    evm.setTrigButton(Pos.LEFT, Keys.BTN_RIGHT)
+    evm.setTrigButton(Pos.RIGHT, Keys.BTN_LEFT)
 
-    evm.setTrigAxis(Pos.LEFT, Axes.ABS_Z)
-    evm.setTrigAxis(Pos.RIGHT, Axes.ABS_RZ)
+    evm.setButtonAction(SCButtons.LB, Keys.KEY_VOLUMEDOWN)
+    evm.setButtonAction(SCButtons.RB, Keys.KEY_VOLUMEUP)
 
-    evm.setButtonAction(SCButtons.A, Keys.BTN_A)
-    evm.setButtonAction(SCButtons.B, Keys.BTN_B)
-    evm.setButtonAction(SCButtons.X, Keys.BTN_X)
-    evm.setButtonAction(SCButtons.Y, Keys.BTN_Y)
-    evm.setButtonAction(SCButtons.LB, Keys.BTN_TL)
-    evm.setButtonAction(SCButtons.RB, Keys.BTN_TR)
-    evm.setButtonAction(SCButtons.BACK, Keys.BTN_SELECT)
-    evm.setButtonAction(SCButtons.START, Keys.BTN_START)
-    evm.setButtonAction(SCButtons.STEAM, Keys.BTN_MODE)
-    evm.setButtonAction(SCButtons.LPAD, Keys.BTN_THUMBL)
-    evm.setButtonAction(SCButtons.RPAD, Keys.BTN_THUMBR)
-    evm.setButtonAction(SCButtons.LGRIP, Keys.BTN_A)
-    evm.setButtonAction(SCButtons.RGRIP, Keys.BTN_B)
+    evm.setButtonAction(SCButtons.STEAM, Keys.KEY_HOMEPAGE)
+
+    evm.setButtonAction(SCButtons.A, Keys.KEY_ENTER)
+    evm.setButtonAction(SCButtons.B, Keys.KEY_BACKSPACE)
+    evm.setButtonAction(SCButtons.X, Keys.KEY_ESC)
+    evm.setButtonAction(SCButtons.Y, Keys.KEY_PLAYPAUSE)
+
+    evm.setButtonAction(SCButtons.START, Keys.KEY_NEXTSONG)
+    evm.setButtonAction(SCButtons.BACK, Keys.KEY_PREVIOUSSONG)
+
+    evm.setButtonAction(SCButtons.LGRIP, Keys.KEY_BACK)
+    evm.setButtonAction(SCButtons.RGRIP, Keys.KEY_FORWARD)
+
+    evm.setButtonAction(SCButtons.LPAD, Keys.BTN_MIDDLE)
+    evm.setButtonAction(SCButtons.RPAD, Keys.KEY_SPACE)
 
     return evm
 
@@ -97,8 +98,7 @@ if __name__ == '__main__':
                 evm = evminit()
                 sc = SteamController(callback=evm.process)
                 sc.run()
-
             except KeyboardInterrupt:
-                pass
+                return
 
     _main()

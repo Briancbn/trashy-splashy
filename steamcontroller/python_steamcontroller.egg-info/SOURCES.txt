@@ -9,6 +9,7 @@ scripts/sc-desktop.py
 scripts/sc-dump.py
 scripts/sc-gyro-plot.py
 scripts/sc-mixed.py
+scripts/sc-start.py
 scripts/sc-test-cmsg.py
 scripts/sc-xbox.py
 scripts/vdf2json.py
