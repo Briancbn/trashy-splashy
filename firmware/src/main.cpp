@@ -79,7 +79,7 @@ void run_command()
         Serial.println("OK");
         break;
     case ANGULAR_INPUT:
-        input_angular_speed = arg1;
+        input_angular_speed = -arg1;
         Serial.println("OK");
         break;
     case GET_YAW:
