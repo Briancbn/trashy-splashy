@@ -17,7 +17,7 @@ void Fin::init(PWMServo* _servos, int* _offset_angle_deg){
 
   servos = _servos;
   offset_angle_deg = _offset_angle_deg;
-  write_angle_deg(90);
+  write_angle_deg(-15);
 
 }
 
@@ -65,10 +65,10 @@ void Fin::write(int linear_speed, int angular_speed, int incline)
     }
 
     if(propel_L > 0){
-      input_phase_shift_deg.push_back(PHASE_SHIFT * (i - (int)(num_fin_servos / 4)));
+      input_phase_shift_deg.push_back(PHASE_SHIFT * (- i + (int)(num_fin_servos / 4)));
     }
     else{
-      input_phase_shift_deg.push_back(PHASE_SHIFT * ((int)(num_fin_servos / 4) - i));
+      input_phase_shift_deg.push_back(PHASE_SHIFT * ((int)(- num_fin_servos / 4) + i));
     }
   }
 
@@ -83,10 +83,10 @@ void Fin::write(int linear_speed, int angular_speed, int incline)
     }
 
     if(propel_R > 0){
-      input_phase_shift_deg.push_back(PHASE_SHIFT * (i - (int)(num_fin_servos / 4)));
+      input_phase_shift_deg.push_back(PHASE_SHIFT * (- i + (int)(num_fin_servos / 4)));
     }
     else{
-      input_phase_shift_deg.push_back(PHASE_SHIFT * ((int)(num_fin_servos / 4) - i));
+      input_phase_shift_deg.push_back(PHASE_SHIFT * ((int)(- num_fin_servos / 4) + i));
     }
   }
 

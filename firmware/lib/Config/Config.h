@@ -41,12 +41,12 @@
 #define L2_PIN 21
 #define L3_PIN 20
 
-#define R1_OFFSET -5
-#define R2_OFFSET -8
-#define R3_OFFSET -13
-#define L1_OFFSET 5
+#define R1_OFFSET -15
+#define R2_OFFSET -10
+#define R3_OFFSET -5
+#define L1_OFFSET 7
 #define L2_OFFSET 5
-#define L3_OFFSET 10
+#define L3_OFFSET 7
 
 
 
@@ -56,7 +56,7 @@
 
 #define SERVO_ANGLE_RANGE 250
 
-#define DEFAULT_FREQUENCY 1.75
+#define DEFAULT_FREQUENCY 1
 #define PHASE_SHIFT 60
 
 #define ALPHA 11.68
@@ -71,7 +71,7 @@
 #define LEFT_INCLINE_DIRECTION true
 #define RIGHT_INCLINE_DIRECTION true
 
-#define MAX_AMPLITUDE 20 //In deg
+#define MAX_AMPLITUDE 40 //In deg
 #define MIN_AMPLITUDE 0 //In deg
 #define AMPLITUDE_RESOLUTION 255
 

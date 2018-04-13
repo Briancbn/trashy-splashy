@@ -69,7 +69,7 @@ void run_command()
     case STOP:
         Serial.println("OK");
         start_flag = false;
-        robot.write_angle_deg(90);
+        robot.write_angle_deg(-15);
         input_linear_speed = 0;
         input_angular_speed = 0;
         digitalWrite(13, HIGH);
