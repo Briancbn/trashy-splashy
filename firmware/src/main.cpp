@@ -10,7 +10,7 @@
 int pins[] = {L1_PIN, L2_PIN, L3_PIN, R1_PIN, R2_PIN, R3_PIN};
 int offset[] = {L1_OFFSET, L2_OFFSET, L3_OFFSET, R1_OFFSET, R2_OFFSET, R3_OFFSET};
 
-float desired_angle = 0;
+float last_angle = 0;
 float err;
 
 PWMServo servos[6];
@@ -63,13 +63,13 @@ void run_command()
     case START:
         Serial.println("OK");
         start_flag = true;
-        desired_angle = razor_imu.yaw;
+        last_angle = razor_imu.yaw;
         robot.write_angle_deg(0);
         break;
     case STOP:
         Serial.println("OK");
         start_flag = false;
-        robot.write_angle_deg(-15);
+        robot.write_angle_deg(0);
         input_linear_speed = 0;
         input_angular_speed = 0;
         digitalWrite(13, HIGH);
@@ -163,7 +163,7 @@ void setup() {
     while(!razor_imu.update() || millis() < 5000){
         delay(30);
     }
-    desired_angle = razor_imu.yaw;
+    last_angle = razor_imu.yaw;
     imu_timer = 0;
     cpg_timer = 0;
     digitalWrite(13, HIGH);
@@ -235,9 +235,9 @@ void loop() {
                 blinkLED();
                 lastBlink = millis();
             }
-
-            desired_angle += RAD_TO_DEG * input_angular_speed * UPDATE_INTERVAL;
-            float err = scale_angle(razor_imu.yaw - desired_angle);
+            float current_angular_speed = scale_angle(razor_imu.yaw - last_angle) / UPDATE_INTERVAL;
+            last_angle = razor_imu.yaw;
+            float err = -RAD_TO_DEG * input_angular_speed + current_angular_speed;
             pid.load_err(err);
             robot.write(input_linear_speed, pid.get_angular(), 0);
         }
