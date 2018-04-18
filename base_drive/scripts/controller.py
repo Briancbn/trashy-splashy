@@ -26,6 +26,8 @@ class Controller(object):
 
         self.imuMsg = Imu()
         self.seq = 0
+        self.last_yaw = 0
+        self.angular_speed = 0
 
         # Orientation covariance estimation:
         # Observed orientation noise: 0.3 degrees in x, y, 0.6 degrees in z
@@ -214,6 +216,8 @@ class Controller(object):
     def get_imu_state(self):
         try:
             yaw = self.execute(cmdDict["GET_YAW"], "FLOAT")
+            self.angular_speed = -20 * (yaw - self.last_yaw)
+            self.last_yaw = yaw
             pitch = self.execute(cmdDict["GET_PITCH"], "FLOAT")
             roll = self.execute(cmdDict["GET_ROLL"], "FLOAT")
             ax = self.execute(cmdDict["GET_AX"], "FLOAT")

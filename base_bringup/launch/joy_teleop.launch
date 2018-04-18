@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <launch>
     <arg name="teleop_speed" default="200" />
-    <arg name="teleop_turn" default="1" />
+    <arg name="teleop_turn" default="20" />
 
     <include file="$(find joy)/launch/joy.launch.xml" />
 

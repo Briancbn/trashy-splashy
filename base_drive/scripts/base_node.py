@@ -40,6 +40,7 @@ if __name__ == '__main__':
 
         imu_state = Imu()
         imu_pub = rospy.Publisher('imu', Imu, queue_size=1)
+        pid_pub = rospy.Publisher("pid", Float32, queue_size=1)
         rospy.Subscriber("base_drive", Base_drive, drive_callback, queue_size = 1)
         rospy.Subscriber("e_stop", Bool, e_stop_callback, queue_size = 1)
         print("Start publishing message")
@@ -47,6 +48,9 @@ if __name__ == '__main__':
 
         while not rospy.is_shutdown():
             teensy.get_imu_state()
+            angular_speed = Float32()
+            angular_speed.data = teensy.angular_speed
+            pid_pub.publish(angular_speed)
             imu_pub.publish(teensy.imuMsg)
             sleep(0.001)
             PubRate.sleep()
