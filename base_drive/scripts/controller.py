@@ -217,6 +217,10 @@ class Controller(object):
         try:
             yaw = self.execute(cmdDict["GET_YAW"], "FLOAT")
             self.angular_speed = -20 * (yaw - self.last_yaw)
+            if self.angular_speed > 300:
+                self.angular_speed = 0
+            if self.angular_speed < -300:
+                self.angular_speed = 0
             self.last_yaw = yaw
             pitch = self.execute(cmdDict["GET_PITCH"], "FLOAT")
             roll = self.execute(cmdDict["GET_ROLL"], "FLOAT")
