@@ -14,7 +14,7 @@ public:
 	void init();
 	bool update();
 
-	float roll, pitch, yaw;
+	float yaw, roll, pitch, ax, ay, az, gx, gy, gz;
 
 	virtual ~Razor_imu();
 

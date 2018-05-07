@@ -5,19 +5,16 @@
 #include "Config.h"
 #include "PWMServo.h"
 #include "Razorimu.h"
+#include "Command.h"
 
-int L_pins[] = {L1_PIN, L2_PIN, L3_PIN};
-int L_offset[] = {L1_OFFSET, L2_OFFSET, L3_OFFSET};
+int pins[] = {L1_PIN, L2_PIN, L3_PIN, R1_PIN, R2_PIN, R3_PIN};
+int offset[] = {L1_OFFSET, L2_OFFSET, L3_OFFSET, R1_OFFSET, R2_OFFSET, R3_OFFSET};
 
-int R_pins[] = {R1_PIN, R2_PIN, R3_PIN};
-int R_offset[] = {R1_OFFSET, R2_OFFSET, R3_OFFSET};
-
-float desired_angle = 0;
+float last_angle = 0;
 float err;
 
-PWMServo L_servos[3];
-PWMServo R_servos[3];
-Fin L_fin(3), R_fin(3);
+PWMServo servos[6];
+Fin robot(6);
 elapsedMillis cpg_timer;
 
 
@@ -26,52 +23,147 @@ elapsedMillis imu_timer;
 
 PID pid(KP, KI, KD);
 
-int desired_linear_speed, desired_angular_speed;
+bool start_flag = false;
+int input_linear_speed = 0; 
+float input_angular_speed = 0;
 
-void robot_write(int linear, int angular){
-    int left_vel = linear - angular / 2;
-    int right_vel = linear + angular / 2;
-    if(left_vel > 0){
-        L_fin.write(left_vel, LEFT_PROPEL_DIRECTION, 0, true);
-    }
-    else{
-        L_fin.write(-left_vel, !LEFT_PROPEL_DIRECTION, 0, true);
-    }
-    if(right_vel > 0){
-        R_fin.write(right_vel, RIGHT_PROPEL_DIRECTION, 0, true);
-    }
-    else{
-        R_fin.write(-right_vel, !RIGHT_PROPEL_DIRECTION, 0, true);
+long baud = 115200;
+char cmd;
+char argv1[256];
+char argv2[256];
+float arg1;
+float arg2;
+int arg = 0;
+int index0 = 0;
+
+void reset_command(){
+    cmd = ' ';
+    memset(argv1, 0, sizeof(argv1));
+    memset(argv2, 0, sizeof(argv2));
+    arg1 = 0;
+    arg2 = 0;
+    arg = 0;
+    index0 = 0;
+}
+
+void run_command()
+{
+    String args1 = String(argv1);
+    String args2 = String(argv2);
+    arg1 = args1.toFloat();
+    arg2 = args2.toFloat();
+    switch (cmd)
+    {
+    case GET_BAUDRATE:
+        Serial.println(baud);
+        break;
+    case GET_DEVICE:
+        Serial.println("Teensy3.2");
+        break;
+    case START:
+        Serial.println("OK");
+        start_flag = true;
+        last_angle = razor_imu.yaw;
+        robot.write_angle_deg(0);
+        break;
+    case STOP:
+        Serial.println("OK");
+        start_flag = false;
+        robot.write_angle_deg(0);
+        input_linear_speed = 0;
+        input_angular_speed = 0;
+        digitalWrite(13, HIGH);
+        break;
+    case LINEAR_INPUT:
+        input_linear_speed = arg1;
+        Serial.println("OK");
+        break;
+    case ANGULAR_INPUT:
+        input_angular_speed = -arg1;
+        Serial.println("OK");
+        break;
+    case GET_YAW:
+        Serial.println(razor_imu.yaw);
+        break;
+    case GET_PITCH:
+        Serial.println(razor_imu.pitch);
+        break;
+    case GET_ROLL:
+        Serial.println(razor_imu.roll);
+        break;
+    case GET_AX:
+        Serial.println(razor_imu.ax);
+        break;
+    case GET_AY:
+        Serial.println(razor_imu.ay);
+        break;
+    case GET_AZ:
+        Serial.println(razor_imu.az);
+        break;
+    case GET_GX:
+        Serial.println(razor_imu.gx);
+        break;
+    case GET_GY:
+        Serial.println(razor_imu.gy);
+        break;
+    case GET_GZ:
+        Serial.println(razor_imu.gz);
+        break;
+
     }
 }
 
+uint32_t lastBlink = 0;
+void blinkLED()
+{
+  static bool ledState = false;
+  digitalWrite(13, ledState);
+  ledState = !ledState;
+}
+
+void print_imu(){
+        Serial.print(razor_imu.yaw);
+        Serial.print('\t');
+        Serial.print(razor_imu.pitch);
+        Serial.print('\t');
+        Serial.print(razor_imu.roll);
+        Serial.print('\t');
+        Serial.print(razor_imu.ax);
+        Serial.print('\t');
+        Serial.print(razor_imu.ay);
+        Serial.print('\t');
+        Serial.print(razor_imu.az);
+        Serial.print('\t');
+        Serial.print(razor_imu.gx);
+        Serial.print('\t');
+        Serial.print(razor_imu.gy);
+        Serial.print('\t');
+        Serial.print(razor_imu.gz);
+        Serial.print('\n');    
+}
+
 void setup() {
-    for(int i = 0; i < 3; i++){
-        L_servos[i].attach(L_pins[i]);
-    }
-    for(int i = 0; i < 3; i++){
-        R_servos[i].attach(R_pins[i]);
+    for(int i = 0; i < 6; i++){
+        servos[i].attach(pins[i]);
     }
     // put your setup code here, to run once:
     pinMode(13, OUTPUT);
     digitalWrite(13, LOW);
 
-    L_fin.init(L_servos, L_offset);
-    R_fin.init(R_servos, R_offset);
+    robot.init(servos, offset);
     delay(1000);   
 
-    L_fin.write_angle_deg(90);
-    R_fin.write_angle_deg(-90);
+//    robot.write_angle_deg(0);
     
     delay(1000);    
     
-    Serial.begin(115200);
+    Serial.begin(baud);
 
     razor_imu.init();
     while(!razor_imu.update() || millis() < 5000){
         delay(30);
     }
-    desired_angle = razor_imu.yaw;
+    last_angle = razor_imu.yaw;
     imu_timer = 0;
     cpg_timer = 0;
     digitalWrite(13, HIGH);
@@ -91,37 +183,63 @@ float scale_angle(float angle){
     return angle;
 }
 
-int counter = 0;
-int direction = 1;
-int angular = 0;
 void loop() {
+
+
+    while(Serial.available() > 0){
+        char chr = Serial.read();
+        if (chr == 13){
+            if (arg == 1) argv1[index0] = ' ';
+            else if (arg == 2) argv2[index0] = ' ';
+            run_command();
+            reset_command();
+        }
+        else if (chr == ' '){
+            if (arg == 0) arg = 1;
+            else if (arg == 1){
+                argv1[index0] = ' ';
+                arg = 2;
+                index0 = 0;
+            }
+        }
+        else{
+            if (arg == 0){
+                cmd = chr;
+            }
+            else if (arg == 1){
+                argv1[index0] = chr;
+                index0++;
+            }
+            else if (arg == 2){
+                argv2[index0] = chr;
+                index0++;
+            }
+        }
+    }
+    
+
+
     if(imu_timer > 1000 * IMU_UPDATE_RATE){
         imu_timer = 0;
         razor_imu.update();
+        //print_imu();
     }
 
     if(cpg_timer > 1000 * UPDATE_INTERVAL){
-        counter++;
-        if(counter % 10 == 0){
-            angular += 10 * direction;
-            if (angular >= 150 || angular <= -150){
-                direction *= -1;
-            }
-        }
-        //Serial.println(direction);
         cpg_timer = 0;
-        desired_angular_speed = 0;
-        desired_linear_speed = 255;
-        desired_angle += RAD_TO_DEG * desired_angular_speed * UPDATE_INTERVAL;
-        float err = scale_angle(desired_angle - razor_imu.yaw);
-        Serial.print(err);
-        Serial.print("   ");
-        Serial.print(desired_angle);
-        Serial.print("   ");
-        Serial.println(razor_imu.yaw);
-        pid.load_err(err); 
-//        robot_write(0,0);
-//        L_fin.write(150, LEFT_PROPEL_DIRECTION, 0, true);
-        robot_write(desired_linear_speed, pid.get_angular());
+
+        if (start_flag)
+        {
+            if (millis() > lastBlink + 200)
+            {
+                blinkLED();
+                lastBlink = millis();
+            }
+            float current_angular_speed = scale_angle(razor_imu.yaw - last_angle) / UPDATE_INTERVAL;
+            last_angle = razor_imu.yaw;
+            float err = -RAD_TO_DEG * input_angular_speed + current_angular_speed;
+            pid.load_err(err);
+            robot.write(input_linear_speed, pid.get_angular(), 0);
+        }
     }
 }

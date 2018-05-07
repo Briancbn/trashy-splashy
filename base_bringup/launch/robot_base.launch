@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<launch>
+  <arg name="drive_port" value="/dev/drive" />
+  <arg name="drive_baud" value="115200" />
+
+
+  <node pkg="base_drive" name="base_node" type="base_node.py" output="screen">
+    <param name="port" value="$(arg drive_port)" />
+    <param name="baud" value="$(arg drive_baud)" />
+  </node>
+
+  <!--  <include file="$(find act_base_odometry)/launch/act_base_odometry.launch" /> -->
+</launch>
